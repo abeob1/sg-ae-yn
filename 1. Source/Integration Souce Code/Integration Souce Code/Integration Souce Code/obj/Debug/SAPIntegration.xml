@@ -1,0 +1,48 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+SAPIntegration
+</name>
+</assembly>
+<members>
+<member name="P:SAPIntegration.My.Resources.Resources.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:SAPIntegration.My.Resources.Resources.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:SAPIntegration.My.Resources.Resources.RecalculateInterest">
+	<summary>
+  Looks up a localized string similar to Declare @BPcode as nvarchar(20)
+Declare @PrjCode as nvarchar(50)
+Declare @DocEntry as int 
+Declare @Day as int
+Declare @Term as int
+Declare @Term1 As int  
+Declare @Term2 As int  
+Declare @Term3 As int  
+Declare @DailyDisc As numeric(19,6)  
+Declare @DailyDisc2 As numeric(19,6)  
+Declare @DailyDisc3 As numeric(19,6)  
+Declare @OutStanding numeric(19,6)
+  
+  
+set @BPcode = '{0}'
+set @PrjCode = '{1}'
+set @DocEntry = {2}
+set @Term = {3}
+set @Day = {4}
+
+set @OutStanding = (Select SUM(Debit - [rest of string was truncated]";.
+</summary>
+</member><member name="T:SAPIntegration.My.Resources.Resources">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+</members>
+</doc>

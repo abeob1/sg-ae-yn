@@ -1,0 +1,23 @@
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\bin\Debug\SAPIntegration.exe.config
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\obj\Debug\Interop.SAPbobsCOM.dll
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\obj\Debug\SAPIntegration.vbproj.ResolveComReference.cache
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\bin\Debug\SAPIntegration.exe
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\bin\Debug\SAPIntegration.pdb
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\bin\Debug\SAPIntegration.xml
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\bin\Debug\Interop.SAPbobsCOM.dll
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\obj\Debug\SAPIntegration.vbprojResolveAssemblyReference.cache
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\obj\Debug\SAPIntegration.frmMornitor.resources
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\obj\Debug\SAPIntegration.Resources.resources
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\obj\Debug\SAPIntegration.Service1.resources
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\obj\Debug\SAPIntegration.Settings.resources
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\obj\Debug\SAPIntegration.vbproj.GenerateResource.Cache
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\obj\Debug\SAPIntegration.exe.licenses
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\obj\Debug\SAPIntegration.exe
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\obj\Debug\SAPIntegration.xml
+D:\Projects_ABEO\Apex\VN_Source\Addon\Integration Souce Code\obj\Debug\SAPIntegration.pdb
+F:\Application\SAP B1\Projects\Yes  Naturals\Integration Souce Code\Integration Souce Code\bin\Debug\SAPIntegration.exe.config
+F:\Application\SAP B1\Projects\Yes  Naturals\Integration Souce Code\Integration Souce Code\obj\Debug\Interop.SAPbobsCOM.dll
+F:\Application\SAP B1\Projects\Yes  Naturals\Integration Souce Code\Integration Souce Code\obj\Debug\SAPIntegration.vbproj.ResolveComReference.cache
+F:\Application\SAP B1\Projects\Yes  Naturals\Integration Souce Code\Integration Souce Code\obj\Debug\SAPIntegration.exe
+F:\Application\SAP B1\Projects\Yes  Naturals\Integration Souce Code\Integration Souce Code\obj\Debug\SAPIntegration.xml
+F:\Application\SAP B1\Projects\Yes  Naturals\Integration Souce Code\Integration Souce Code\obj\Debug\SAPIntegration.pdb
