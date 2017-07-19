@@ -1,0 +1,378 @@
+USE [YN_Trading]
+GO
+/****** Object:  StoredProcedure [dbo].[AE_SP001_StockAgeingReport_WhseModified]    Script Date: 05/17/2017 14:42:49 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+--[AE_SP001_StockAgeingReport_WhseModified]  '2016-12-31',100,119,'01','Normal','Local'
+ALTER PROCEDURE [dbo].[AE_SP001_StockAgeingReport_WhseModified] 
+(	
+@AgingDate DateTime
+,@FromItemGroup VARCHAR(20)
+,@ToItemGroup VARCHAR(20)
+,@Warehouse VARCHAR(20)
+,@Nature NVARCHAR(100)
+,@Source NVARCHAR(100)
+)
+	
+
+AS 
+BEGIN
+
+--DECLARE @AgingDate DateTime
+--,@FromItemGroup VARCHAR(20)
+--,@ToItemGroup VARCHAR(20)
+--,@Warehouse VARCHAR(20)
+--,@Nature NVARCHAR(100)
+--,@Source NVARCHAR(100)
+
+--SET @AgingDate = '2017-04-30'
+--SET @FromItemGroup  ='100'
+--SET @ToItemGroup = '119'
+--SET @Warehouse = 'ALL'   --'SHAWROAD'
+--SET @Nature = 'Normal'
+--SET @Source = 'Local'
+
+DECLARE @AgeColumn5 INT
+DECLARE @COMNAME VARCHAR(100) 
+ 
+Declare @CompAddress NVARCHAR(500)
+declare @ItemCodeFrom varchar(20)
+declare @ItemCodeTo varchar(20)
+
+DECLARE @SysCurr NVARCHAR(3)
+DECLARE @LocCurr NVARCHAR(3)
+DECLARE @CoRegNo NVARCHAR(100)
+DECLARE @GSTRegNo NVARCHAR(100)
+DECLARE @CompName NVARCHAR(100)
+DECLARE @CompAddr NVARCHAR(max)
+DECLARE @Telphone NVARCHAR(50)
+DECLARE @FAX NVARCHAR(50)
+ 
+SELECT Top 1 @LocCurr = MainCurncy
+			,@SysCurr=SysCurrncy
+			,@CoRegNo = TaxIdNum
+			,@GSTRegNo = TaxIdNum2
+		 	,@CompAddr=CompnyAddr 
+			,@Telphone=Phone1 
+			,@FAX=Fax 			
+			,@CompName = ISNULL(OADM.PrintHeadr,OADM.CompnyName) from OADM
+	
+DECLARE  @Header1 NVARCHAR(20), @Header2 NVARCHAR(20)
+        ,@Header3 NVARCHAR(20), @Header4 NVARCHAR(20) 
+        ,@Header5 NVARCHAR(20), @Header6 NVARCHAR(20) 
+        ,@Header7 NVARCHAR(20), @Header8 NVARCHAR(20) 
+        ,@Header9 NVARCHAR(20), @Header10 NVARCHAR(20) 
+
+DECLARE  @Bracket1 INT, @Bracket2 INT
+        ,@Bracket3 INT, @Bracket4 INT 
+        ,@Bracket5 INT, @Bracket6 INT 
+        ,@Bracket7 INT, @Bracket8 INT 
+        ,@Bracket9 INT, @Bracket10 INT 
+        
+
+DECLARE  @Interval1 INT, @Interval2 INT
+        ,@Interval3 INT, @Interval4 INT 
+       ,@Interval5 INT, @Interval6 INT 
+        ,@Interval7 INT, @Interval8 INT 
+        ,@Interval9 INT, @Interval10 INT 
+        
+        
+DECLARE @Interval NVARCHAR(20)
+SET @Interval = 30 
+  
+SELECT 
+    @Interval1 = @Interval
+    ,@Interval2= @Interval
+    ,@Interval3= @Interval
+    ,@Interval4= @Interval
+    ,@Interval5= @Interval
+    ,@Interval6= @Interval
+    ,@Interval7= @Interval
+    ,@Interval8= @Interval
+    ,@Interval9 = @Interval
+    ,@Interval10 = @Interval
+        
+        
+SET @Bracket1 = @Interval1
+SET @Bracket2 = @Bracket1 + @Interval2
+SET @Bracket3 = @Bracket2 + @Interval3
+SET @Bracket4 = @Bracket3 + @Interval4
+SET @Bracket5 = @Bracket4 + @Interval5
+SET @Bracket6 = @Bracket5 + @Interval6
+SET @Bracket7 = @Bracket6 + @Interval7
+SET @Bracket8 = @Bracket7 + @Interval8
+SET @Bracket9 = @Bracket8 + @Interval9
+SET @Bracket10 = @Bracket9 + @Interval10
+ 
+    
+    SET @Header1 = '0'+ ' to ' +char(13)+ RTRIM(@Bracket1)
+    SET @Header2 = RTRIM(@Bracket1+1) + ' to ' +char(13)+ RTRIM(@Bracket2)
+    SET @Header3 = RTRIM(@Bracket2+1) + ' to ' +char(13)+ RTRIM(@Bracket3)
+    SET @Header4 = RTRIM(@Bracket3+1) + ' to ' +char(13)+ RTRIM(@Bracket4)
+    SET @Header5 = RTRIM(@Bracket4+1) + ' to ' +char(13)+ RTRIM(@Bracket5)
+    SET @Header6 = RTRIM(@Bracket5+1) + ' to ' +char(13)+ RTRIM(@Bracket6)
+    SET @Header7 = 'Over ' + RTRIM(@Bracket6+1)  
+    
+
+IF @AgingDate = '' OR @AgingDate IS NULL
+	begin
+		Set @AgingDate = GetDate()
+	end
+	
+if UPPER(@Warehouse  )='ALL'
+set @Warehouse  ='%'
+ELSE
+DECLARE @WareHouseName NVARCHAR(100) =(SELECT WhsName FROM OWHS WHERE WhsCode =@Warehouse )
+
+--GETTING STOCK FOR ALL THE ITEMCODES BASED ON THE SELECTION CRITERIA
+Select MAX(A.TransType) [TransType] ,
+SUM(A.TransValue) AS X ,
+	A.ItemCode,A.Warehouse [WhsCode] ,D.WhsName 
+	, max(B.ItemName) as Description
+	, CONVERT(DECIMAL(36,3),ISNULL(Sum(IsNull(A.InQty,0) - IsNull(A.OutQty,0)),0.0)) As OnHand
+	, SUM(ISNULL(A.InQty,0))- SUM(ISNULL(A.OutQty,0)) AS Stock 
+	, CONVERT(DECIMAL(36,9),ISNULL(Sum(A.TransValue),0.0000000)) As TransValue
+	, CONVERT(DECIMAL(36,9),ISNULL(Sum(A.CalcPrice),0.0000000)) As CalcPrice
+	,B.AvgPrice as AvgPrice
+Into #OnHand
+From OINM A
+	Join OITM B On A.ItemCode = B.ItemCode
+	INNER JOIN OITB C ON C.ItmsGrpCod =B.ItmsGrpCod 
+	INNER JOIN OWHS D ON D.WhsCode =A.Warehouse 
+where A.DocDate <=	@AgingDate -- and b.ItemCode in('00000016')
+AND C.ItmsGrpCod BETWEEN @FromItemGroup AND @ToItemGroup AND A.Warehouse like @Warehouse  
+AND B.U_AB_Nature = @Nature AND B.U_AB_Source = @Source
+Group By A.ItemCode, B.AvgPrice,A.Warehouse  ,D.WhsName 
+--HAVING ISNULL(Sum(IsNull(A.InQty,0) - IsNull(A.OutQty,0)),0)<>0  OR  ISNULL(Sum(A.TransValue),0)<>0
+
+--GETTING THE CUMULATIVE CURRENT STOCK BASED ON THE ITEMCODE
+
+SELECT Itemcode,SUM(OnHand) CumQty,
+		SUM(TransValue) CumTransavalue,
+		CASE WHEN SUM(OnHand) = 0 THEN 0 ELSE SUM(TransValue)/SUM(OnHand) END AS Cost, whscode INTO #CurrentStock FROM #OnHand 
+		GROUP BY ItemCode, whscode
+--HAVING Sum(OnHand)<>0 
+
+--SELECT * FROM #CurrentStock WHERE ItemCode = '00006052'
+		
+		
+select 
+	A.ItemCode 
+	,A.Dscription 
+	,A.DocDate  
+	,sum((IsNull(A.InQty,0) - IsNull(A.OutQty,0))) As InQty
+	,MAX(A.TransType)[TransType]
+	,C.ItmsGrpCod 
+	,C.ItmsGrpNam 
+	,D.WhsCode 
+	,D.WhsName 
+	 
+INTO #OINM FROM OINM A
+
+INNER JOIN OITM B ON A.ItemCode =B.ItemCode
+INNER JOIN OITB C ON B.ItmsGrpCod =C.ItmsGrpCod 
+INNER JOIN OWHS D ON D.WhsCode =A.Warehouse 
+WHERE A.DocDate<=@AgingDate  --and A.ItemCode in('00000007') 
+ 	--AND A.InQty>0 AND A.TransType<>67 
+ 	--AND A.TransValue <> 0
+AND B.U_AB_Nature = @Nature AND B.U_AB_Source = @Source AND A.Warehouse like @Warehouse
+GROUP BY A.ItemCode,A.Dscription,A.DocDate,C.ItmsGrpCod ,C.ItmsGrpNam ,D.WhsCode ,D.WhsName 
+--HAVING sum((IsNull(A.InQty,0) - IsNull(A.OutQty,0))) <> 0 --AND SUM(A.TransValue) <> 0
+order by A.DocDate  desc
+
+--SELECT * FROM #OINM WHERE ItemCode = '00006052' AND ItmsGrpCod = 109 ORDER BY DocDate 
+
+select top(1)
+	 ItemCode
+	,Dscription [ItemName]
+	,DocDate 
+	,InQty [Quantity]
+	,TransValue 
+	,TransType
+	,CONVERT(NUMERIC(19,2), 0.0) OnHand 
+	,CAST('' AS NVARCHAR(20) ) ItmGrpCode 
+	,CAST('' AS NVARCHAR(200)) ItemGrpName
+	,CAST('' AS NVARCHAR(20) ) WhsCode 
+	,CAST('' AS NVARCHAR(200)) WhsName
+INTO #AgingQty FROM OINM 
+
+DELETE #AgingQty 
+
+DECLARE @ItemCode varchar(200)
+DECLARE @CumQty numeric(19,4)
+declare @CumTransavalue numeric(19,4)
+DECLARE @Cost numeric(19,4)
+DECLARE @CurrWhscode varchar(80)
+DECLARE @ItemCode1 varchar(80)
+DECLARE @ItemName Nvarchar(100)
+DECLARE @DocDate datetime
+DECLARE @Quantity numeric(19,4)
+DECLARE @TransType int
+DECLARE @ItmsGrpCod NVARCHAR(20)
+DECLARE @ItmsGrpName NVARCHAR(150)
+DECLARE @WhsCode NVARCHAR(40)
+DECLARE @WhsName NVARCHAR(100)
+
+DECLARE @BALANCE numeric(19,4)
+
+
+DECLARE Cur_CurrentStock CURSOR
+STATIC FOR 
+SELECT Itemcode,CumQty,CumTransavalue,Cost, whscode  FROM #CurrentStock --where ItemCode = '00000648'
+ 
+OPEN Cur_CurrentStock
+IF @@CURSOR_ROWS > 0
+BEGIN 
+ 
+	 FETCH NEXT FROM Cur_CurrentStock INTO @ItemCode,@CumQty,@CumTransavalue,@Cost,@CurrWhscode
+	 WHILE @@Fetch_status = 0
+	 BEGIN
+		 set @BALANCE = @CumQty
+       
+			DECLARE Cur_OINM CURSOR
+            STATIC FOR 
+            SELECT ItemCode,Dscription,InQty ,DocDate,TransType ,ItmsGrpCod ,ItmsGrpNam,WhsCode ,WhsName  
+            FROM #OINM WHERE ItemCode= @ItemCode and whscode = @CurrWhscode ORDER BY DocDate DESC
+          
+			OPEN Cur_OINM
+			IF @@CURSOR_ROWS > 0
+				BEGIN
+					FETCH NEXT FROM Cur_OINM INTO @itemcode1,@ItemName, @Quantity, @DocDate,@TransType
+												 ,@ItmsGrpCod,@ItmsGrpName,@WhsCode ,@WhsName 
+					WHILE @@Fetch_status = 0
+					BEGIN
+					IF @BALANCE > @Quantity 
+						BEGIN
+							INSERT INTO #AgingQty VALUES (@itemcode1,@ItemName,@DocDate, @Quantity,@CumTransavalue,@TransType
+														 ,@CumQty,@ItmsGrpCod,@ItmsGrpName,@WhsCode ,@WhsName )
+							SET @BALANCE = @BALANCE - @Quantity
+						END
+					 ELSE
+						BEGIN
+						   INSERT INTO #AgingQty VALUES (@itemcode1,@ItemName,@DocDate, @BALANCE,@CumTransavalue,@TransType
+														,@CumQty ,@ItmsGrpCod ,@ItmsGrpName ,@WhsCode ,@WhsName )
+						   
+						   IF CURSOR_STATUS('global','Cur_OINM')>=-1
+							BEGIN
+								CLOSE Cur_OINM
+								DEALLOCATE Cur_OINM
+							END 
+							BREAK
+						END
+						
+                   FETCH NEXT FROM Cur_OINM INTO @itemcode1,@ItemName, @Quantity, @DocDate,@TransType,@ItmsGrpCod,@ItmsGrpName,@WhsCode ,@WhsName
+                   
+				END
+		END
+		IF CURSOR_STATUS('global','Cur_OINM')>=-1
+		BEGIN
+			CLOSE Cur_OINM
+			DEALLOCATE Cur_OINM
+		END 
+		
+ 		FETCH NEXT FROM Cur_CurrentStock INTO @ItemCode,@CumQty,@CumTransavalue,@Cost,@CurrWhscode
+	END
+END
+            
+IF CURSOR_STATUS('global','Cur_OINM')>=-1
+BEGIN
+CLOSE Cur_OINM
+DEALLOCATE Cur_OINM
+END 
+
+IF CURSOR_STATUS('global','Cur_CurrentStock')>=-1
+BEGIN
+CLOSE Cur_CurrentStock
+DEALLOCATE Cur_CurrentStock
+END 
+
+--SELECT * FROM #AgingQty  WHERE ItemCode = '00000007' ORDER BY DocDate 
+
+Select MAX(A.TransType)[TransType] ,
+	A.ItemCode
+	,MAX( A.ItemName )[ItemName]
+	, A.OnHand
+	, A.TransValue
+	,MAX( A.ItmGrpCode )[ItmGrpCode]
+	,MAX( A.ItemGrpName )[ItemGrpName]
+	 
+	, Sum (Case when DateDiff(day,A.DocDate,@AgingDate) between 0 And @Bracket1  Then Quantity Else 0 End) as 'Bracket1'
+	, Sum (Case when DateDiff(day,A.DocDate,@AgingDate) between (@Bracket1 + 1) And @Bracket2  Then Quantity Else 0 End) as 'Bracket2'
+	, Sum (Case when DateDiff(day,A.DocDate,@AgingDate) between (@Bracket2 + 1) And @Bracket3 Then Quantity Else 0 End) as 'Bracket3'
+	, Sum (Case when DateDiff(day,A.DocDate,@AgingDate) between (@Bracket3 + 1) And @Bracket4 Then Quantity Else 0 End) as 'Bracket4'
+	, Sum (Case when DateDiff(day,A.DocDate,@AgingDate) between (@Bracket4 + 1) And @Bracket5 Then Quantity Else 0 End) as 'Bracket5'
+	, Sum (Case when DateDiff(day,A.DocDate,@AgingDate) between (@Bracket5 + 1) And @Bracket6 Then Quantity Else 0 End) as 'Bracket6'
+	, Sum (Case when DateDiff(day,A.DocDate,@AgingDate) >@Bracket6  Then Quantity Else 0 End) as 'Bracket7'
+	 
+	, A.WhsCode 
+	, A.WhsName 
+ 
+INTO #AgingBrackets
+
+FROM #AgingQty  A
+GROUP BY A.ItemCode ,A.OnHand, A.TransValue, A.WhsCode, A.WhsName
+		  
+ORDER BY A.ItemCode  
+
+--SELECT * FROM #AgingBrackets WHERE ItemCode = '00006052'
+
+SELECT @SysCurr [SysCurrency],@LocCurr [LocCurrency]
+       ,@CoRegNo [CoRegNo],@GSTRegNo [GSTRegNo]
+	   ,@CompName [CompName],@CompAddr [CompAddress]
+	   ,@Telphone [Telephone],@FAX [FAX],(select Top 1 LogoImage from OADP) [LogoImage] ,WhsName [WarehouseName]--,@WareHouseName [WarehouseName]
+	   ,CASE  WHEN TransType = 14 THEN 'CN'
+              WHEN TransType = 15 THEN 'DN'
+              WHEN TransType = 16 THEN 'RE'
+              WHEN TransType = 18 THEN 'PU'
+              WHEN TransType = 20 THEN 'PD' 
+              WHEN TransType = 59 THEN 'SI'               
+              WHEN TransType = 67 THEN 'IM' 
+        END AS Trasaction 
+	   ,ItemCode ,ItemName ,OnHand ,TransValue ,  TransType ,ItmGrpCode ,ItemGrpName, 
+	    Bracket1  [Bracket1_Qty],Bracket2 [Bracket2_Qty]
+	   ,Bracket3  [Bracket3_Qty],Bracket4  [Bracket4_Qty],Bracket5  [Bracket5_Qty]
+	   ,Bracket6  [Bracket6_Qty],Bracket7  [Bracket7_Qty]
+	   
+	  	,CASE WHEN (OnHand<>0  AND TransValue <>0 ) THEN ((TransValue) /(OnHand) ) *(Bracket1) ELSE 0 END as 'Bracket1'
+		,CASE WHEN (OnHand<>0  AND TransValue <>0 ) THEN ((TransValue) /(OnHand) ) *(Bracket2) ELSE 0 END as 'Bracket2'
+		,CASE WHEN (OnHand<>0  AND TransValue <>0 ) THEN ((TransValue) /(OnHand) ) *(Bracket3) ELSE 0 END as 'Bracket3'
+		,CASE WHEN (OnHand<>0  AND TransValue <>0 ) THEN ((TransValue) /(OnHand) ) *(Bracket4) ELSE 0 END as 'Bracket4'
+		,CASE WHEN (OnHand<>0  AND TransValue <>0 ) THEN ((TransValue) /(OnHand) ) *(Bracket5) ELSE 0 END as 'Bracket5'
+		,CASE WHEN (OnHand<>0  AND TransValue <>0 ) THEN ((TransValue) /(OnHand) ) *(Bracket6) ELSE 0 END as 'Bracket6'
+		,CASE WHEN (OnHand<>0  AND TransValue <>0 ) THEN ((TransValue) /(OnHand) ) *(Bracket7) ELSE 0 END as 'Bracket7'
+		
+		,@Header1 [Header1],@Header2 [Header2],@Header3 [Header3],@Header4 [Header4],@Header5 [Header5],@Header6 [Header6]
+		,@Header7 [Header7]
+	   
+INTO #STOCKFINAL FROM #AgingBrackets  --WHERE OnHand <> 0
+--GROUP BY ItemCode ,ItemName
+ORDER BY ItemCode 
+
+SELECT (CASE WHEN T0.OnHand > 0 THEN (T0.TransValue /T0.OnHand) ELSE T0.TransValue END) [CalPrice],T0.* 
+FROM #STOCKFINAL T0
+LEFT JOIN OITM T1 ON T0.ItemCode = T1.ItemCode
+WHERE T1.U_AB_Nature = @Nature AND T1.U_AB_Source = @Source
+--AND T0.WhsCode = @Warehouse
+ 
+SET NOCOUNT OFF 
+
+
+DROP TABLE #CurrentStock 
+DROP TABLE #OnHand 
+DROP TABLE #OINM 
+DROP TABLE #AgingQty 
+DROP TABLE #AgingBrackets
+DROP TABLE #STOCKFINAL
+
+END
+
+--EXEC [AE_SP001_StockAgeingReport] '20150228','104','104','TB'...
+
+--select '#CurrentStock',* from #CurrentStock where ItemCode = '00000762' 
+--select '#OnHand',* from #OnHand where ItemCode = '00000762'
+--select '#OINM',* from #OINM where ItemCode = '00000762' and WhsCode  = 'CONS' AND InQty > 0
+--select '#AgingQty',* from #AgingQty where WhsCode = 'CONS' and ItemCode = '00000762' order by DocDate 
+--select * from #AgingBrackets WHERE ItemCode = '00000762'
+--select * from #STOCKFINAL where ItemCode = '00000762'
